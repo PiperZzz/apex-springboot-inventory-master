@@ -5,12 +5,14 @@ import com.apex.eqp.inventory.services.RecalledProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,10 +26,17 @@ public class RecalledProductController {
         return ResponseEntity.ok(recalledProductService.save(recalledProduct));
     }
 
-    @GetMapping("/")
+    @GetMapping
     ResponseEntity<Collection<RecalledProduct>> findRecallProducts() {
         Collection<RecalledProduct> allRecalledProducts = recalledProductService.getAllRecalledProducts();
 
         return ResponseEntity.ok(allRecalledProducts);
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<RecalledProduct> findRecalledProduct(@PathVariable Integer id) {
+        Optional<RecalledProduct> byId = recalledProductService.findById(id);
+
+        return byId.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

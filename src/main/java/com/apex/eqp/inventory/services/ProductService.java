@@ -29,13 +29,35 @@ public class ProductService {
         return inventoryRepository.save(product);
     }
 
-    public Collection<Product> getAllProduct() {
-        ProductFilter filter = new ProductFilter(null);
+    public Collection<Product> getAllProducts() {
+        Set<String> recalledProductNames = recalledProductRepository.findAll()
+                .stream()
+                .map(RecalledProduct::getName)
+                .collect(Collectors.toSet());
+
+        ProductFilter filter = new ProductFilter(recalledProductNames);
 
         return filter.removeRecalledFrom(inventoryRepository.findAll());
     }
 
     public Optional<Product> findById(Integer id) {
         return inventoryRepository.findById(id);
+    }
+
+    @Transactional
+    public void deleteById(Integer id) {
+        inventoryRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Product updateProduct(Integer id, Product updatedProduct) {
+        return inventoryRepository.findById(id)
+            .map(existingProduct -> {
+                existingProduct.setName(updatedProduct.getName());
+                existingProduct.setPrice(updatedProduct.getPrice());
+                existingProduct.setQuantity(updatedProduct.getQuantity());
+                return inventoryRepository.save(existingProduct);
+            })
+            .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
     }
 }
