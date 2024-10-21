@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 class ProductServiceTests {
@@ -113,5 +114,18 @@ class ProductServiceTests {
         assertTrue(result.contains(apple));
         assertTrue(result.contains(cookies));
         assertFalse(result.contains(gum));
+    }
+
+    @Test
+    void shouldDeleteProduct() {
+        Product product = createTestProduct("productToDelete", 2.0, 10);
+        Product savedProduct = productService.save(product);
+
+        Assertions.assertNotNull(productService.findById(savedProduct.getId()).orElse(null));
+
+        productService.deleteById(savedProduct.getId());
+
+        Optional<Product> deletedProduct = productService.findById(savedProduct.getId());
+        Assertions.assertTrue(deletedProduct.isEmpty());
     }
 }

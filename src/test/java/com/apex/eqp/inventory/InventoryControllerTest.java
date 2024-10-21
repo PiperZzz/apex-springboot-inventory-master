@@ -19,7 +19,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -105,5 +111,42 @@ class InventoryControllerTest {
 
         mockMvc.perform(get("/api/inventory/product/99"))
                 .andExpect(status().isNotFound());
+    }
+
+    @SneakyThrows
+    @Test
+    void deleteProduct_shouldDeleteProduct() {
+        Integer productId = 1;
+        Product product = new Product();
+        product.setId(productId);
+        
+        when(productService.findById(productId)).thenReturn(Optional.of(product));
+        doNothing().when(productService).deleteById(productId);
+
+        mockMvc.perform(
+                delete("/api/inventory/product/{id}", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isNoContent());
+
+        verify(productService, times(1)).findById(productId);
+        verify(productService, times(1)).deleteById(productId);
+    }
+
+    @SneakyThrows
+    @Test
+    void deleteProduct_shouldReturnNotFoundWhenDeletingNonExistentProduct() {
+        Integer productId = 999;
+        
+        when(productService.findById(productId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(
+                delete("/api/inventory/product/{id}", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isNotFound());
+
+        verify(productService, times(1)).findById(productId);
+        verify(productService, never()).deleteById(anyInt());
     }
 }
