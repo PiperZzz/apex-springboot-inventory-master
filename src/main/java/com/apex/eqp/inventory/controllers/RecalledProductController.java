@@ -37,6 +37,6 @@ public class RecalledProductController {
     ResponseEntity<RecalledProduct> findRecalledProduct(@PathVariable Integer id) {
         Optional<RecalledProduct> byId = recalledProductService.findById(id);
 
-        return byId.map(ResponseEntity::ok).orElse(null);
+        return byId.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

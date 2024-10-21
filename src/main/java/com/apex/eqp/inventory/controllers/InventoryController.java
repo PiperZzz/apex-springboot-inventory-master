@@ -39,6 +39,6 @@ public class InventoryController {
     ResponseEntity<Product> findProduct(@PathVariable Integer id) {
         Optional<Product> byId = productService.findById(id);
 
-        return byId.map(ResponseEntity::ok).orElse(null);
+        return byId.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

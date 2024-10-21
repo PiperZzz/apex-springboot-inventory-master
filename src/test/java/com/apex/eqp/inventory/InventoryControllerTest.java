@@ -1,7 +1,10 @@
 package com.apex.eqp.inventory;
 
 import com.apex.eqp.inventory.controllers.InventoryController;
+import com.apex.eqp.inventory.entities.Product;
 import com.apex.eqp.inventory.services.ProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +18,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
@@ -26,10 +37,12 @@ class InventoryControllerTest {
     private MockMvc mockMvc;
 
     @InjectMocks
-    InventoryController inventoryController;
+    private InventoryController inventoryController;
 
     @Mock
-    ProductService productService;
+    private ProductService productService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void before() {
@@ -47,4 +60,50 @@ class InventoryControllerTest {
         ).andExpect(status().isOk());
     }
 
+    @Test
+    void getAllProducts_ShouldReturnListOfProducts() throws Exception {
+        Product product1 = new Product(1, "Product 1", 10.0, 5);
+        Product product2 = new Product(2, "Product 2", 20.0, 10);
+        when(productService.getAllProduct()).thenReturn(Arrays.asList(product1, product2));
+
+        mockMvc.perform(get("/api/inventory/product"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].name").value("Product 1"))
+                .andExpect(jsonPath("$[1].name").value("Product 2"));
+    }
+
+    @Test
+    void createProduct_ShouldReturnCreatedProduct() throws Exception {
+        Product productToCreate = new Product(null, "New Product", 15.0, 7);
+        Product createdProduct = new Product(3, "New Product", 15.0, 7);
+        when(productService.save(any(Product.class))).thenReturn(createdProduct);
+
+        mockMvc.perform(post("/api/inventory/product")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(productToCreate)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.name").value("New Product"));
+    }
+
+    @Test
+    void findProduct_WithExistingId_ShouldReturnProduct() throws Exception {
+        Product product = new Product(1, "Product 1", 10.0, 5);
+        when(productService.findById(1)).thenReturn(Optional.of(product));
+
+        mockMvc.perform(get("/api/inventory/product/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value("Product 1"));
+    }
+
+    @Test
+    void findProduct_WithNonExistingId_ShouldReturnNotFound() throws Exception {
+        when(productService.findById(99)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/inventory/product/99"))
+                .andExpect(status().isNotFound());
+    }
 }
