@@ -72,7 +72,7 @@ class InventoryControllerTest {
     void getAllProducts_ShouldReturnListOfProducts() throws Exception {
         Product product1 = new Product(1, "Product 1", 10.0, 5);
         Product product2 = new Product(2, "Product 2", 20.0, 10);
-        when(productService.getAllProduct()).thenReturn(Arrays.asList(product1, product2));
+        when(productService.getAllProducts()).thenReturn(Arrays.asList(product1, product2));
 
         mockMvc.perform(get("/api/inventory/product"))
                 .andExpect(status().isOk())

@@ -29,7 +29,7 @@ public class InventoryController {
      */
     @GetMapping
     public ResponseEntity<Collection<Product>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProduct());
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @PostMapping

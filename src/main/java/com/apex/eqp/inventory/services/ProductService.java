@@ -29,7 +29,7 @@ public class ProductService {
         return inventoryRepository.save(product);
     }
 
-    public Collection<Product> getAllProduct() {
+    public Collection<Product> getAllProducts() {
         Set<String> recalledProductNames = recalledProductRepository.findAll()
                 .stream()
                 .map(RecalledProduct::getName)

@@ -108,7 +108,7 @@ class ProductServiceTests {
         // All recalled products
         when(recalledProductRepository.findAll()).thenReturn(List.of(recalledGum));
 
-        Collection<Product> result = productService.getAllProduct();
+        Collection<Product> result = productService.getAllProducts();
 
         assertEquals(2, result.size());
         assertTrue(result.contains(apple));
