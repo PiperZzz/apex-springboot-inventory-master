@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -148,5 +150,33 @@ class InventoryControllerTest {
 
         verify(productService, times(1)).findById(productId);
         verify(productService, never()).deleteById(anyInt());
+    }
+
+    @Test
+    void updateProduct_shouldUpdateProduct() throws Exception {
+        Integer productId = 1;
+        Product updatedProduct = new Product(productId, "UpdatedProduct", 2.5, 15);
+        
+        when(productService.updateProduct(eq(productId), any(Product.class))).thenReturn(updatedProduct);
+
+        mockMvc.perform(put("/api/inventory/product/{id}", productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedProduct)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(updatedProduct)));
+    }
+
+    @Test
+    void updateProduct_shouldReturn404WhenUpdatingNonExistentProduct() throws Exception {
+        Integer nonExistentProductId = 999;
+        Product updatedProduct = new Product(nonExistentProductId, "NonExistentProduct", 1.0, 1);
+        
+        when(productService.updateProduct(eq(nonExistentProductId), any(Product.class)))
+                .thenThrow(new RuntimeException("Product not found"));
+
+        mockMvc.perform(put("/api/inventory/product/{id}", nonExistentProductId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedProduct)))
+                .andExpect(status().isNotFound());
     }
 }

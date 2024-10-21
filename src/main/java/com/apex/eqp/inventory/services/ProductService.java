@@ -48,4 +48,16 @@ public class ProductService {
     public void deleteById(Integer id) {
         inventoryRepository.deleteById(id);
     }
+
+    @Transactional
+    public Product updateProduct(Integer id, Product updatedProduct) {
+        return inventoryRepository.findById(id)
+            .map(existingProduct -> {
+                existingProduct.setName(updatedProduct.getName());
+                existingProduct.setPrice(updatedProduct.getPrice());
+                existingProduct.setQuantity(updatedProduct.getQuantity());
+                return inventoryRepository.save(existingProduct);
+            })
+            .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    }
 }
