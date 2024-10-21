@@ -8,12 +8,15 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class RecalledProductService {
 
     private final RecalledProductRepository recalledProductRepository;
 
+    @Transactional
     public RecalledProduct save(RecalledProduct recalledProduct) {
         return recalledProductRepository.save(recalledProduct);
     }

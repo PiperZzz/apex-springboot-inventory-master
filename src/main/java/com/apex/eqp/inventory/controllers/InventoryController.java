@@ -1,7 +1,6 @@
 package com.apex.eqp.inventory.controllers;
 
 import com.apex.eqp.inventory.entities.Product;
-import com.apex.eqp.inventory.entities.RecalledProduct;
 import com.apex.eqp.inventory.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
